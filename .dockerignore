@@ -1,6 +1,12 @@
 .dockerignore
-../.gitignore
 Dockerfile
+docker-compose.yml
 README.md
+
 venv
 __pycache__
+
+tests
+.github
+.idea
+
