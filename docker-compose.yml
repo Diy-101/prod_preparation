@@ -12,7 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - ./tests/init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
-      - db-data:/var/lib/postgresql/dataoc
+      - db-data:/var/lib/postgresql/data
     restart: unless-stopped
 
   backend:
@@ -27,6 +27,18 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+
+  newman:
+    image: postman/newman:latest
+    container_name: newman
+    command: ["run", "/etc/newman/public-tests.json"]
+    volumes:
+      - ./tests:/etc/newman
+    depends_on:
+      - backend
+    environment:
+      - base_url=http://backend:8080/api
+    restart: no
 
 volumes:
   db-data:
