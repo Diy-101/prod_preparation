@@ -53,7 +53,7 @@ jobs:
       - name: Run Postman tests
         run: |
           newman run tests/public-tests.json \
-            --env-var "base_url=http://localhost:8080/api" \
+            --env-var "base_url=http://backend:8080/api" \
             --reporters cli,json \
             --reporter-json-export result.json
 
