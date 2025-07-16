@@ -3,7 +3,7 @@ import uvicorn
 
 app = FastAPI()
 
-@app.get("/api/ping")
+@app.get("/api/ping", tags=['/ping'])
 def ping():
     return {"status": "success"}
 
