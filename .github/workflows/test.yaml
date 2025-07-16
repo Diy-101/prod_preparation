@@ -29,6 +29,14 @@ jobs:
         run: |
           docker compose up -d
 
+      - name: Check backend logs
+        run: |
+          docker-compose logs backend
+
+      - name: Check if service is up
+        run: |
+          curl -v http://localhost:8080/ping
+
       - name: Wait for services to start
         run: |
           sleep 10
