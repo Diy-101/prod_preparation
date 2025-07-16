@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16.1-alpine
+    container_name: test-db
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./tests/init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+      - db-data:/var/lib/postgresql/dataoc
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: solution/Dockerfile
+    container_name: backend
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgresql://testuser:testpass@db:5432/testdb
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  db-data:
