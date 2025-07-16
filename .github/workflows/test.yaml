@@ -31,7 +31,7 @@ jobs:
 
       - name: Check backend logs
         run: |
-          docker-compose logs backend
+          docker compose logs backend
 
       - name: Check if service is up
         run: |
