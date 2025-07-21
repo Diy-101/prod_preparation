@@ -1,15 +1,27 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, Literal, Annotated
+from typing import Annotated, Literal
 
-class CountryAlpha2(BaseModel):
-    alpha2: str = Field(...,
-                        max_length=2,
-                        pattern="^[a-zA-Z]{2}$",
-                        examples=["RU"],
-                        description="Двухбуквенный код, уникально идентифицирующий страну")
+from pydantic import BaseModel, Field
+from enum import StrEnum
+from typing import Optional
 
-class CountryRegion(BaseModel):
-    country: Literal["Europe", "Africa", "Americas", "Oceania", "Asia"] = Field(..., description="Географический регион, к которому относится страна")
+CountryRegion = Annotated[str,
+    Field(
+        default=None,
+        description="Географический регион, к которому относится страна",
+        examples=["Europe", "Asia"]
+    )
+]
+
+CountryAlpha2 = Annotated[
+    str,
+    Field(
+        ...,
+        max_length=2,
+        pattern="^[A-Z]{2}$",
+        examples=["RU"],
+        description="Двухбуквенный код, уникально идентифицирующий страну"
+    )
+]
 
 class Country(BaseModel):
     name: str = Field(..., max_length=100, description="Полное название страны")
@@ -18,4 +30,4 @@ class Country(BaseModel):
                         max_length=3,
                         pattern="^[a-zA-Z]{3}$",
                         description="Трехбуквенный код страны")
-    region: Optional[CountryRegion] = None
+    region: Literal["Europe", "Africa", "Americas", "Oceania", "Asia"] | None = None
