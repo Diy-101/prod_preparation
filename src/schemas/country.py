@@ -1,25 +1,18 @@
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
-from enum import StrEnum
-from typing import Optional
 
-CountryRegion = Annotated[str,
-    Field(
-        default=None,
-        description="Географический регион, к которому относится страна",
-        examples=["Europe", "Asia"]
-    )
-]
+class CountryAlpha2String(str):
+    pass  # Можно добавить кастомную логику, но для OpenAPI достаточно аннотаций
 
 CountryAlpha2 = Annotated[
-    str,
+    CountryAlpha2String,
     Field(
-        ...,
+        min_length=2,
         max_length=2,
-        pattern="^[A-Z]{2}$",
-        examples=["RU"],
-        description="Двухбуквенный код, уникально идентифицирующий страну"
+        pattern=r'^[A-Za-z]{2}$',
+        example='RU',
+        description='Двухбуквенный код, уникально идентифицирующий страну'
     )
 ]
 
