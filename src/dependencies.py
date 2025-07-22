@@ -1,9 +1,9 @@
 from src.database.connection import SessionLocal
 
 def get_db():
-    session = SessionLocal()
+    db = SessionLocal()
     try:
-        yield session
+        yield db
     finally:
-        session.close()
+        db.close()
 
