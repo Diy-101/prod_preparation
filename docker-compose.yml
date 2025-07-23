@@ -37,16 +37,14 @@ services:
   newman:
     image: postman/newman:latest
     container_name: newman
-    command: ["run", "/etc/newman/public-tests.json"]
+    command: ["run",
+              "/etc/newman/public-tests.json",
+              "-e", "/etc/newman/env.json", "--silent"]
     volumes:
       - ./tests:/etc/newman
     depends_on:
       - backend
-    environment:
-      - base_url=http://backend:8080/api
     restart: no
-    profiles:
-      - donotstart
 
 volumes:
   db-data:

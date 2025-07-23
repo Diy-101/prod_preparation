@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from src.database.models import Country
 
-async def select_all_countries(db: Session, region: list | None = None):
+def select_countries(db: Session, region: list | None = None):
     stmt = select(Country)
 
     if region is not None:
@@ -15,3 +15,8 @@ async def select_all_countries(db: Session, region: list | None = None):
             if country.region == "":
                 country.region = None
     return countries_result
+
+def select_alpha2(db: Session, alpha2: str):
+    stmt = select(Country).where(Country.alpha2 == alpha2)
+    result = db.execute(stmt).scalar()
+    return result
