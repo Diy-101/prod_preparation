@@ -1,5 +1,5 @@
 from typing import Annotated, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 class Country(BaseModel):
     name: str = Field(..., max_length=100, description="Полное название страны")
