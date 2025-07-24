@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from sqlalchemy.orm import Session
-from typing import List, Annotated
+from typing import Annotated
 from src.schemas.country import Country
 from src.dependencies import get_db
 from src.database.crud import select_countries, select_alpha2
@@ -12,7 +12,7 @@ country_router = APIRouter()
     "/api/countries",
     tags=["country"],
     summary="Get all countries from database",
-    response_model=List[Country],
+    response_model=list[Country],
     responses={
         400: {
             "description": "Формат входного запроса не соответствует формату либо переданы неверные значения.",
@@ -28,7 +28,7 @@ country_router = APIRouter()
     },
 )
 def get_countries(
-    region: List[str] = Query(
+    region: list[str] = Query(
         None,
         description="Список регионов для фильтрации стран. Доступные значения: Europe, Africa, Americas, Oceania, Asia. "
                     "Если параметр отсутствует или передан пустой массив — фильтрация не применяется.",
@@ -64,7 +64,7 @@ def get_countries(
 }
 )
 def get_alpha2(
-        alpha2: Annotated[str, Query(max_length=2, pattern=r"[A-Z]{2}", description="Возвращаемая страна должна иметь указанный alpha2 код.")],
+        alpha2: Annotated[str, Path(max_length=2, pattern=r"[A-Z]{2}", description="Возвращаемая страна должна иметь указанный alpha2 код.")],
         db: Session = Depends(get_db),
 ):
     result = select_alpha2(db, alpha2=alpha2)
