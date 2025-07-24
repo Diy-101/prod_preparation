@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import Field
 from sqlalchemy.orm import Session
 from typing import List, Annotated
 from src.schemas.country import Country
@@ -65,7 +64,7 @@ def get_countries(
 }
 )
 def get_alpha2(
-        alpha2: Annotated[str, Field(..., max_length=2, pattern=r"[A-Z]{2}", description="Возвращаемая страна должна иметь указанный alpha2 код.")],
+        alpha2: Annotated[str, Query(max_length=2, pattern=r"[A-Z]{2}", description="Возвращаемая страна должна иметь указанный alpha2 код.")],
         db: Session = Depends(get_db),
 ):
     result = select_alpha2(db, alpha2=alpha2)
