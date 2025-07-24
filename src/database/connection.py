@@ -1,6 +1,11 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from dotenv import load_dotenv
+from pathlib import Path
 from os import getenv
+
+env_path = Path(".") / ".env"
+load_dotenv(dotenv_path=env_path)
 
 user = getenv("DB_USER")
 password = getenv("DB_PASS")

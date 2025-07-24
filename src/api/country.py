@@ -11,7 +11,7 @@ country_router = APIRouter()
 
 @country_router.get(
     "/api/countries",
-    tags=["Country"],
+    tags=["country"],
     summary="Get all countries from database",
     response_model=List[Country],
     responses={
@@ -47,7 +47,7 @@ def get_countries(
 
 @country_router.get(
     "/api/countries/{alpha2}",
-    tags=["Country"],
+    tags=["country"],
     summary="Get one country from database via alpha2",
     response_model=Country,
     responses={
