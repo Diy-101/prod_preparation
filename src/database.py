@@ -1,19 +1,8 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from dotenv import load_dotenv
-from pathlib import Path
-from os import getenv
+from src.constants import DB_URL
 
-env_path = Path(".") / ".env"
-load_dotenv(dotenv_path=env_path)
-
-user = getenv("DB_USER")
-password = getenv("DB_PASS")
-host = getenv("DB_HOST")
-port = getenv("DB_PORT")
-name = getenv("DB_NAME")
-
-engine = create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}")
+engine = create_engine(DB_URL)
 
 metadata = MetaData()
 metadata.reflect(bind=engine)
