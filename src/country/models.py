@@ -1,6 +1,5 @@
-from src.database.connection import metadata
-from src.database.connection import Base
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from src.database import Base
+from sqlalchemy import Column, Integer, String
 
 class Country(Base):
     __tablename__ = "countries"
@@ -9,4 +8,3 @@ class Country(Base):
     alpha2 = Column(String(2), nullable=False, unique=True)
     alpha3 = Column(String(3), nullable=False, unique=True)
     region = Column(String(100))
-

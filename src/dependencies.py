@@ -1,5 +1,5 @@
 from fastapi.security import OAuth2PasswordBearer
-from src.database.connection import SessionLocal
+from src.database import SessionLocal
 
 def get_db():
     db = SessionLocal()

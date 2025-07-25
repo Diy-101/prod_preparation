@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from src.database.models import Country
+from src.country.models import Country
 
 def select_countries(db: Session, region: list | None = None):
     stmt = select(Country)

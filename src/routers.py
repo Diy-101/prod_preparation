@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from src.api.default import default_router
-from src.api.user import user_router
-from src.api.country import country_router
+from src.default.router import default_router
+from src.user.router import user_router
+from src.country.router import country_router
 
 main_router = APIRouter()
 main_router.include_router(default_router)
