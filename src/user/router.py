@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, Body, HTTPException
+from fastapi import APIRouter, Depends, Body, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.database import get_db
 import src.user.schemas as schemas, src.user.models as models
+import src.user.utils as utils
 
 user_router = APIRouter()
 
 @user_router.post(
-    "/auth/register",
+    "/api/auth/register",
     tags=["users"],
     summary="Регистрация нового пользователя",
+    status_code=status.HTTP_201_CREATED,
     description="Используется для регистрации нового пользователя по логину и паролю",
     response_model=schemas.UserProfile,
     responses={
@@ -35,9 +37,7 @@ user_router = APIRouter()
             "content": {
                 "application/json": {
                     "example": {
-                        {
                         "reason": "<объяснение, почему запрос пользователя не может быть обработан>"
-                        }
                     }
                 }
             }
@@ -47,9 +47,7 @@ user_router = APIRouter()
             "content": {
                 "application/json": {
                     "example": {
-                        {
                         "reason": "<объяснение, почему запрос пользователя не может быть обработан>"
-                        }
                     }
                 }
             }
@@ -76,12 +74,43 @@ async def register_user(
         ],
         db: Session = Depends(get_db)
 ):
-    query: models.User | None
+    # Check for existence
     for check in ["login", "email", "phone"]:
-        query = db.query(models.User).filter(getattr(models.User, check) == user_data[check]).first()
-        if query is not None:
-            raise HTTPException(
+        if hasattr(user_data, check) and getattr(user_data, check):
+            check_value = getattr(user_data, check)
+            if hasattr(check_value, "root"):
+                check_value = check_value.root
+
+            query = db.query(models.User).filter(
+                getattr(models.User, check) == check_value
+            ).first()
+
+            if query is not None:
+                raise HTTPException(
                 status_code=409,
                 detail=f"Пользователь с таким {check} уже существует"
-            )
-    return
+                )
+
+    # Creating new user
+    hashed_password = utils.get_password_hash(user_data.password)
+    new_user = models.User(
+        login=user_data.login,
+        email=user_data.email,
+        countryCode=user_data.countryCode,
+        isPublic=user_data.isPublic,
+        phone=user_data.phone,
+        image=user_data.image,
+        hashed_password=hashed_password,
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return schemas.UserProfile(
+        login=user_data.login,
+        email=user_data.email,
+        countryCode=user_data.countryCode,
+        isPublic=user_data.isPublic,
+        phone=user_data.phone,
+        image=user_data.image,
+    )

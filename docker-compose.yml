@@ -37,7 +37,7 @@ services:
     container_name: newman
     command: ["run",
               "/etc/newman/public-tests.json",
-              "-e", "/etc/newman/env.json", "--silent"]
+              "-e", "/etc/newman/env.json"]
     volumes:
       - ./tests:/etc/newman
     depends_on:

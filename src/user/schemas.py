@@ -33,14 +33,14 @@ class UserPassword(RootModel[Annotated[str, Field(
 
 class UserIsPublic(RootModel[Annotated[bool, Field(
     examples=["true"],
-    description="Публичные профили доступны другим пользователям: если профиль публичный,\ "
-                "любой пользователь платформы сможет получить информацию о пользователе."
+    description="Публичные профили доступны другим пользователям: если профиль публичный, \
+    любой пользователь платформы сможет получить информацию о пользователе."
 )]]):
     pass
 
 class UserPhone(RootModel[Annotated[str, Field(
     max_length=20,
-    pattern="\+[\d]+",
+    pattern=r"\+[\d]+",
     examples=["example: +74951239922"],
     description="Номер телефона пользователя в формате +123456789"
 )]]):
@@ -67,10 +67,7 @@ class UserRegistration(UserProfile):
     @field_validator("password", mode="after")
     @classmethod
     def validate_password(cls, field: str) -> str:
-        if len(field) < 6:
-            raise ValueError("Пароль должен быть не менее 6 символов.")
-        if len(field) > 100:
-            raise ValueError("Пароль должен быть не более 100 символов.")
+        field = str(field)
         if not re.search(r"[a-z]", field):
             raise ValueError("Пароль должен содержать строчные латинские буквы.")
         if not re.search(r"[A-Z]", field):
