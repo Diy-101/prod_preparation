@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.country.schema import Country
-from src.dependencies import get_db
+from src.database import get_db
 from src.country.utils import select_countries, select_alpha2
-from src.exceptions import ErrorResponse
+from src.models import ErrorResponse
 
 country_router = APIRouter()
 
