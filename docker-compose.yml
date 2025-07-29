@@ -43,8 +43,6 @@ services:
     depends_on:
       - backend
     restart: no
-    profiles:
-      - donotrun
 
 volumes:
   db-data:
