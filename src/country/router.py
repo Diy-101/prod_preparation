@@ -4,7 +4,7 @@ from typing import Annotated
 from src.country.schema import Country
 from src.database import get_db
 from src.country.utils import select_countries, select_alpha2
-from src.models import ErrorResponse
+from src.schemas import ErrorResponse
 
 country_router = APIRouter()
 
