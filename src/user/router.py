@@ -76,13 +76,12 @@ async def register_user(
         ],
         db: Session = Depends(get_db)
 ):
-    check_login = db.query(models.User).filter(models.User.login == user_data.login).first()
-    if check_login is not None:
-        raise HTTPException(409, detail="Пользователь с таким login уже существует")
-    check_email = db.query(models.User).filter(models.User.email == user_data.email).first()
-    if check_email is not None:
-        raise HTTPException(409, detail="Пользователь с таким email уже существует")
-    check_phone = db.query(models.User).filter(models.User.phone == user_data.phone).first()
-    if check_phone is not None:
-        raise HTTPException(409, detail="Пользователь с таким phone уже существует")
+    query: models.User | None
+    for check in ["login", "email", "phone"]:
+        query = db.query(models.User).filter(getattr(models.User, check) == user_data[check]).first()
+        if query is not None:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Пользователь с таким {check} уже существует"
+            )
     return
