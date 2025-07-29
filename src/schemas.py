@@ -2,10 +2,8 @@ from pydantic import BaseModel, Field, RootModel
 from typing import Annotated, Literal
 
 class CountryAlpha2(RootModel[Annotated[str,  Field(
-                        min_length=2,
-                        max_length=2,
-                        pattern="^[a-zA-Z]{2}$",
-                        description="Двухбуквенный код страны"
+    pattern="^[a-zA-Z]{2}$",
+    description="Двухбуквенный код страны"
 )]]):
     pass
 
