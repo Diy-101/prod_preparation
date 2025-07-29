@@ -9,11 +9,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     combined = " ".join(set(reasons))
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content=ErrorResponse(reason=combined),
+        content=ErrorResponse(reason=combined).model_dump(),
     )
 
 async def http409_handler(request: Request, exc: HTTPException) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
-        content=ErrorResponse(reason=exc.detail),
+        content=ErrorResponse(reason=exc.detail).model_dump(),
     )

@@ -1,7 +1,88 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Body, HTTPException
+from sqlalchemy.orm import Session
+from typing import Annotated
+from src.database import get_db
+import src.user.schemas as schemas, src.user.models as models
 
 user_router = APIRouter()
 
-@user_router.get("/users", tags=["users"], summary="Get all users")
-async def get_all_users(token: str):
-    return {"token": token}
+@user_router.post(
+    "/auth/register",
+    tags=["users"],
+    summary="Регистрация нового пользователя",
+    description="Используется для регистрации нового пользователя по логину и паролю",
+    response_model=schemas.UserProfile,
+    responses={
+        201: {
+            "description": "В случае успеха возвращается профиль зарегистрированного пользователя",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "profile": {
+                            "login": "yellowMonkey",
+                            "email": "yellowstone1980@you.ru",
+                            "countryCode": "RU",
+                            "isPublic": True,
+                            "phone": "+74951239922",
+                            "image": "https://http.cat/images/100.jpg"
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Регистрационные данные не соответствуют ожидаемому формату и требованиям.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        {
+                        "reason": "<объяснение, почему запрос пользователя не может быть обработан>"
+                        }
+                    }
+                }
+            }
+        },
+        409: {
+            "description": "Нарушено требование на уникальность авторизационных данных пользователей.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        {
+                        "reason": "<объяснение, почему запрос пользователя не может быть обработан>"
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
+async def register_user(
+        user_data: Annotated[
+            schemas.UserRegistration,
+            Body(
+                description="Данные для регистрации пользователя.",
+                examples=[
+                    {
+                    "login": "yellowMonkey",
+                    "email": "yellowstone1980@you.ru",
+                    "password": "$aba4821FWfew01#.fewA$",
+                    "countryCode": "RU",
+                    "isPublic": True,
+                    "phone": "+74951239922",
+                    "image": "https://http.cat/images/100.jpg"
+                    }
+                ]
+            )
+        ],
+        db: Session = Depends(get_db)
+):
+    check_login = db.query(models.User).filter(models.User.login == user_data.login).first()
+    if check_login is not None:
+        raise HTTPException(409, detail="Пользователь с таким login уже существует")
+    check_email = db.query(models.User).filter(models.User.email == user_data.email).first()
+    if check_email is not None:
+        raise HTTPException(409, detail="Пользователь с таким email уже существует")
+    check_phone = db.query(models.User).filter(models.User.phone == user_data.phone).first()
+    if check_phone is not None:
+        raise HTTPException(409, detail="Пользователь с таким phone уже существует")
+    return
