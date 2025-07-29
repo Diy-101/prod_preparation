@@ -7,8 +7,5 @@ class CountryAlpha2(RootModel[Annotated[str,  Field(
 )]]):
     pass
 
-class CountryRegion(RootModel[Literal["Europe", "Africa", "Americas", "Oceania", "Asia"]]):
-    pass
-
 class ErrorResponse(BaseModel):
     reason: str = Field(..., min_length=5)
