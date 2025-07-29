@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, TypeAdapter, RootModel
+from pydantic import BaseModel, Field, RootModel
 from typing import Annotated, Literal
 
 class CountryAlpha2(RootModel[Annotated[str,  Field(
