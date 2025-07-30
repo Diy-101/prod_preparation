@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from os import getenv
 import jwt
 from src.database import get_db
-import models
+import src.user.models as models
 
 load_dotenv()
 
@@ -16,7 +16,7 @@ ACCESS_TOKEN_TIME_MINUTES = int(getenv("AUTH_TOKEN_TIME_MINUTES"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/sign-in")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -41,14 +41,14 @@ def verify_token(token):
     except jwt.PyJWTError:
         return None
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
+async def get_profile(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
     username = verify_token(token)
     if username is None:
         raise HTTPException(
             status_code=401,
             detail="Переданный токен не существует либо некорректен.",
         )
-    user = db.query(models.User).filter(models.User.username == username).first()
+    user = db.query(models.User).filter(models.User.login == username).first()
     if user is None:
         raise HTTPException(
             status_code=404,
