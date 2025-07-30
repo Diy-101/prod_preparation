@@ -1,4 +1,10 @@
-from fastapi import APIRouter, Depends, Body, HTTPException, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Body,
+    HTTPException,
+    status,
+)
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.database import get_db
@@ -13,7 +19,6 @@ user_router = APIRouter()
     summary="Регистрация нового пользователя",
     status_code=status.HTTP_201_CREATED,
     description="Используется для регистрации нового пользователя по логину и паролю",
-    response_model=schemas.UserProfile,
     responses={
         201: {
             "description": "В случае успеха возвращается профиль зарегистрированного пользователя",
@@ -74,11 +79,15 @@ async def register_user(
         ],
         db: Session = Depends(get_db)
 ):
+    data = user_data.model_dump(mode="python")
+    if data["image"]:
+        data["image"] = data["image"].unicode_string()
+
     # Check for existence
     query = db.query(models.User).filter(
-        (models.User.email == user_data.email.root) |
-        (models.User.login == user_data.login.root) |
-        (models.User.phone == user_data.phone.root)
+        (models.User.email == data["email"]) |
+        (models.User.login == data["login"]) |
+        (models.User.phone == data["phone"])
     ).first()
 
     if query is not None:
@@ -89,13 +98,14 @@ async def register_user(
 
     # Creating new user
     hashed_password = utils.get_password_hash(user_data.password)
+
     new_user = models.User(
-        login=user_data.login.root,
-        email=user_data.email.root,
-        countryCode=user_data.countryCode.root,
-        isPublic=user_data.isPublic.root,
-        phone=user_data.phone.root if user_data.phone is not None else None,
-        image=user_data.image.root if user_data.image is not None else None,
+        login=data["login"],
+        email=data["email"],
+        countryCode=data["countryCode"],
+        isPublic=data["isPublic"],
+        phone=data["phone"],
+        image=data["image"],
         hashed_password=hashed_password,
     )
 
@@ -103,7 +113,9 @@ async def register_user(
     db.commit()
     db.refresh(new_user)
 
-    return schemas.UserProfile.model_validate(new_user)
+    return {
+        "profile": schemas.UserProfile(**data).model_dump(exclude_none=True)
+    }
 
 @user_router.post(
     "/api/auth/sign-in",
@@ -133,8 +145,8 @@ async def sign_up_user(user_data: Annotated[dict, Body(
         }
     ]
 )], db: Session = Depends(get_db)):
-    query: models.User | None = db.query(models.User).filter(models.User.login == user_data.login).first()
-    if query is None or not utils.verify_password(user_data.password, query.hashed_password):
+    query: models.User | None = db.query(models.User).filter(models.User.login == user_data["login"]).first()
+    if query is None or not utils.verify_password(user_data["password"], query.hashed_password):
         raise HTTPException(
             status_code=401,
             detail="Пользователь с указанным логином и паролем не найден",
