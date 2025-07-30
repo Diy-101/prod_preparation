@@ -136,7 +136,8 @@ async def register_user(
         }
     }
 )
-async def sign_up_user(user_data: Annotated[dict, Body(
+async def sign_up_user(
+        user_data: Annotated[dict, Body(
     description="Данные для аутентификации пользователя.",
     examples=[
         {
@@ -144,7 +145,9 @@ async def sign_up_user(user_data: Annotated[dict, Body(
             "password": "$aba4821FWfew01#.fewA$",
         }
     ]
-)], db: Session = Depends(get_db)):
+)],
+        db: Session = Depends(get_db)
+):
     query: models.User | None = db.query(models.User).filter(models.User.login == user_data["login"]).first()
     if query is None or not utils.verify_password(user_data["password"], query.hashed_password):
         raise HTTPException(
