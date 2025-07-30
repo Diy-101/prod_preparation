@@ -1,5 +1,5 @@
-from pydantic import BaseModel, RootModel, Field, EmailStr, HttpUrl, field_validator
-from typing import Optional, Literal, Annotated
+from pydantic import BaseModel, RootModel, Field, EmailStr, HttpUrl, ConfigDict, field_validator
+from typing import Annotated
 from src.schemas import CountryAlpha2
 import re
 
@@ -60,6 +60,10 @@ class UserProfile(BaseModel):
     isPublic: UserIsPublic
     phone: UserPhone | None = None
     image: UserImage | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 class UserRegistration(UserProfile):
     password: UserPassword

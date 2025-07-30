@@ -9,7 +9,7 @@ user_router = APIRouter()
 
 @user_router.post(
     "/api/auth/register",
-    tags=["users"],
+    tags=["user"],
     summary="Регистрация нового пользователя",
     status_code=status.HTTP_201_CREATED,
     description="Используется для регистрации нового пользователя по логину и паролю",
@@ -75,42 +75,32 @@ async def register_user(
         db: Session = Depends(get_db)
 ):
     # Check for existence
-    for check in ["login", "email", "phone"]:
-        if hasattr(user_data, check) and getattr(user_data, check):
-            check_value = getattr(user_data, check)
-            if hasattr(check_value, "root"):
-                check_value = check_value.root
+    query = db.query(models.User).filter(
+        (models.User.email == user_data.email.root) |
+        (models.User.login == user_data.login.root) |
+        (models.User.phone == user_data.phone.root)
+    ).first()
 
-            query = db.query(models.User).filter(
-                getattr(models.User, check) == check_value
-            ).first()
-
-            if query is not None:
-                raise HTTPException(
-                status_code=409,
-                detail=f"Пользователь с таким {check} уже существует"
-                )
+    if query is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Пользователь с таким данными уже существует"
+        )
 
     # Creating new user
     hashed_password = utils.get_password_hash(user_data.password)
     new_user = models.User(
-        login=user_data.login,
-        email=user_data.email,
-        countryCode=user_data.countryCode,
-        isPublic=user_data.isPublic,
-        phone=user_data.phone,
-        image=user_data.image,
+        login=user_data.login.root,
+        email=user_data.email.root,
+        countryCode=user_data.countryCode.root,
+        isPublic=user_data.isPublic.root,
+        phone=user_data.phone.root if user_data.phone is not None else None,
+        image=user_data.image.root if user_data.image is not None else None,
         hashed_password=hashed_password,
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return schemas.UserProfile(
-        login=user_data.login,
-        email=user_data.email,
-        countryCode=user_data.countryCode,
-        isPublic=user_data.isPublic,
-        phone=user_data.phone,
-        image=user_data.image,
-    )
+
+    return schemas.UserProfile.model_validate(new_user)
