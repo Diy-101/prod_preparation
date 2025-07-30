@@ -104,3 +104,41 @@ async def register_user(
     db.refresh(new_user)
 
     return schemas.UserProfile.model_validate(new_user)
+
+@user_router.post(
+    "/api/auth/sign-in",
+    tags=["user"],
+    summary="Аутентификация для получения токена",
+    description="Роутер для получения токена пользователем для дальнейшей авторизации",
+    status_code=status.HTTP_200_OK,
+    responses={
+        200: {
+            "description": "Возвращает токен пользователя",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "token": "<KEY>"
+                    }
+                }
+            }
+        }
+    }
+)
+async def sign_up_user(user_data: Annotated[dict, Body(
+    description="Данные для аутентификации пользователя.",
+    examples=[
+        {
+            "login": "yellowMonkey",
+            "password": "$aba4821FWfew01#.fewA$",
+        }
+    ]
+)], db: Session = Depends(get_db)):
+    query: models.User | None = db.query(models.User).filter(models.User.login == user_data.login).first()
+    if query is None or not utils.verify_password(user_data.password, query.hashed_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Пользователь с указанным логином и паролем не найден",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    token = utils.create_access_token(data={"sub": query.login})
+    return {"token": token}
