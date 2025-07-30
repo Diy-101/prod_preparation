@@ -17,3 +17,9 @@ async def http409_handler(request: Request, exc: HTTPException) -> JSONResponse:
         status_code=status.HTTP_409_CONFLICT,
         content=ErrorResponse(reason=exc.detail).model_dump(),
     )
+
+async def http401_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content=ErrorResponse(reason=exc.detail).model_dump(),
+    )
