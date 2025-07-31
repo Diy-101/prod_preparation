@@ -172,13 +172,6 @@ async def sign_up_user(
     response_model_exclude_none=True,
 )
 async def get_user_profile(
-        user: models.User = Depends(utils.get_profile_via_token)
+        user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token)
 ) -> schemas.UserProfile:
-    return schemas.UserProfile(
-        login=user.login,
-        email=user.email,
-        countryCode=user.countryCode,
-        isPublic=user.isPublic,
-        phone=user.phone,
-        image=user.image,
-    )
+    return user_profile
