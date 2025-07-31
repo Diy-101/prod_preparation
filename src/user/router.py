@@ -169,10 +169,11 @@ async def sign_up_user(
     tags=["user"],
     summary="Получение собственного профиля",
     description="Используется для получения пользователем его собственного профиля.",
-    response_model=schemas.UserProfile,
     response_model_exclude_none=True,
 )
-async def get_user_profile(user: models.User = Depends(utils.get_profile)):
+async def get_user_profile(
+        user: models.User = Depends(utils.get_profile_via_token)
+) -> schemas.UserProfile:
     return schemas.UserProfile(
         login=user.login,
         email=user.email,
