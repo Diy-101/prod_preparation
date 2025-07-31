@@ -86,3 +86,15 @@ class UserSignIn(BaseModel):
 
 class Token(BaseModel):
     token: str
+
+class UserProfileUpdate(BaseModel):
+    login: user_login | None = None
+    email: user_email | None = None
+    countryCode: CountryAlpha2 | None = None
+    isPublic: user_is_public | None = None
+    phone: user_phone | None = None
+    image: user_image | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
