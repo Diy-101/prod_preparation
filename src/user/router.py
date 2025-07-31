@@ -17,8 +17,8 @@ user_router = APIRouter()
     "/api/auth/register",
     tags=["user"],
     summary="Регистрация нового пользователя",
+description="Используется для регистрации нового пользователя по логину и паролю",
     status_code=status.HTTP_201_CREATED,
-    description="Используется для регистрации нового пользователя по логину и паролю",
     responses={
         201: {
             "description": "В случае успеха возвращается профиль зарегистрированного пользователя",
@@ -78,17 +78,24 @@ async def register_user(
             )
         ],
         db: Session = Depends(get_db)
-):
-    data = user_data.model_dump(mode="python")
-    if data["image"]:
+) -> schemas.UserProfileRegistered:
+    data = user_data.model_dump(mode="python", exclude_none=True)
+
+    if data.get("image", None) is not None:
         data["image"] = data["image"].unicode_string()
 
     # Check for existence
-    query = db.query(models.User).filter(
-        (models.User.email == data["email"]) |
-        (models.User.login == data["login"]) |
-        (models.User.phone == data["phone"])
-    ).first()
+    if data.get("phone", None) is not None:
+        query = db.query(models.User).filter(
+            (models.User.email == data["email"]) |
+            (models.User.login == data["login"]) |
+            (models.User.phone == data["phone"])
+        ).first()
+    else:
+        query = db.query(models.User).filter(
+            (models.User.email == data["email"]) |
+            (models.User.login == data["login"])
+        ).first()
 
     if query is not None:
         raise HTTPException(
@@ -104,8 +111,8 @@ async def register_user(
         email=data["email"],
         countryCode=data["countryCode"],
         isPublic=data["isPublic"],
-        phone=data["phone"],
-        image=data["image"],
+        phone=data["phone"] if data.get("phone", None) else None,
+        image=data["image"] if data.get("image", None) else None,
         hashed_password=hashed_password,
     )
 
@@ -113,9 +120,7 @@ async def register_user(
     db.commit()
     db.refresh(new_user)
 
-    return {
-        "profile": schemas.UserProfile(**data).model_dump(exclude_none=True)
-    }
+    return schemas.UserProfileRegistered(profile=data)
 
 @user_router.post(
     "/api/auth/sign-in",
