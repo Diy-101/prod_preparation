@@ -51,7 +51,7 @@ class UserProfile(BaseModel):
     image: user_image | None = None
 
     model_config = ConfigDict(
-        from_attributes=True
+        from_attributes=True,
     )
 
 class UserRegistration(UserProfile):
@@ -68,3 +68,6 @@ class UserRegistration(UserProfile):
         if not re.search(r"\d", field):
             raise ValueError("Пароль должен содержать хотя бы одну цифру.")
         return field
+
+class UserProfileRegistered(BaseModel):
+    profile: dict[str, str | None | bool]
