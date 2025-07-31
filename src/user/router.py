@@ -17,7 +17,7 @@ user_router = APIRouter()
     "/api/auth/register",
     tags=["user"],
     summary="Регистрация нового пользователя",
-description="Используется для регистрации нового пользователя по логину и паролю",
+    description="Используется для регистрации нового пользователя по логину и паролю",
     status_code=status.HTTP_201_CREATED,
     responses={
         201: {

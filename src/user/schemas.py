@@ -71,3 +71,10 @@ class UserRegistration(UserProfile):
 
 class UserProfileRegistered(BaseModel):
     profile: dict[str, str | None | bool]
+
+class UserSignIn(BaseModel):
+    login: user_login
+    password: user_password
+
+class Token(BaseModel):
+    token: str
