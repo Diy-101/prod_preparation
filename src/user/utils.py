@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from os import getenv
 import jwt
-from src.database import get_db
 import src.user.models as models
+import src.user.schemas as schemas
+from src.database import get_db
 
 load_dotenv()
 
@@ -41,7 +42,7 @@ def verify_token(token):
     except jwt.PyJWTError:
         return None
 
-async def get_profile(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
+async def get_profile_via_token(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
     username = verify_token(token)
     if username is None:
         raise HTTPException(
@@ -54,4 +55,11 @@ async def get_profile(token: str = Depends(oauth2_scheme), db = Depends(get_db))
             status_code=404,
             detail="Пользователь не найдет"
         )
-    return user
+    return schemas.UserProfile(
+        login=user.login,
+        email=user.email,
+        countryCode=user.countryCode,
+        isPublic=user.isPublic,
+        phone=user.phone if user.phone else None,
+        image=user.image if user.image else None,
+    )
