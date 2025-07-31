@@ -16,4 +16,17 @@ class DBSettings(BaseSettings):
         extra="ignore"
     )
 
+class AuthSettings(BaseSettings):
+    secret_key: str
+    algorithm: str
+    token_time_minutes_expiration: int
+
+    model_config = SettingsConfigDict(
+        env_prefix="auth_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
 db_settings = DBSettings()
+auth_settings = AuthSettings()
