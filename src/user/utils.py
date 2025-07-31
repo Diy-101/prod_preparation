@@ -1,19 +1,18 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from os import getenv
 import jwt
+
+from datetime import datetime, timedelta
+
 import src.user.models as models
 import src.user.schemas as schemas
 from src.database import get_db
+from src.config import auth_settings
 
-load_dotenv()
-
-SECRET_KEY = getenv("AUTH_SECRET_KEY")
-ALGORITHM = getenv("AUTH_ALGORITHM")
-ACCESS_TOKEN_TIME_MINUTES = int(getenv("AUTH_TOKEN_TIME_MINUTES"))
+SECRET_KEY = auth_settings.secret_key
+ALGORITHM = auth_settings.algorithm
+TOKEN_TIME_MINUTES_EXPIRATION = auth_settings.token_time_minutes_expiration
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -27,7 +26,7 @@ def get_password_hash(password):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_TIME_MINUTES)
+    expire = datetime.now() + timedelta(minutes=TOKEN_TIME_MINUTES_EXPIRATION)
     to_encode["exp"] = expire
     encoded_jwt = jwt.encode(to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

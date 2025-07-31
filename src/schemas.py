@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, RootModel
-from typing import Annotated, Literal
+from typing import Annotated
 
 class CountryAlpha2(RootModel[Annotated[str,  Field(
     pattern="^[a-zA-Z]{2}$",

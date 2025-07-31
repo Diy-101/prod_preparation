@@ -1,5 +1,5 @@
+from sqlalchemy import Column, Integer, String\
 from src.database import Base
-from sqlalchemy import Column, Integer, String
 
 class Country(Base):
     __tablename__ = "countries"

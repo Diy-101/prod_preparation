@@ -6,7 +6,9 @@ from fastapi import (
     status,
 )
 from sqlalchemy.orm import Session
+
 from typing import Annotated
+
 from src.database import get_db
 import src.user.schemas as schemas, src.user.models as models
 import src.user.utils as utils

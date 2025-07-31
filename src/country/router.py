@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from sqlalchemy.orm import Session
+
 from typing import Annotated
+
 from src.country.schemas import Country
 from src.database import get_db
 from src.country.utils import select_countries, select_alpha2

@@ -1,9 +1,6 @@
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, Field
 from typing import Literal
 from src.schemas import CountryAlpha2
-
-class CountryRegion(RootModel[Literal["Europe", "Africa", "Americas", "Oceania", "Asia"]]):
-    pass
 
 class Country(BaseModel):
     name: str = Field(..., max_length=100, description="Полное название страны")
@@ -13,4 +10,4 @@ class Country(BaseModel):
                         max_length=3,
                         pattern="^[a-zA-Z]{3}$",
                         description="Трехбуквенный код страны")
-    region: CountryRegion | None = None
+    region: Literal["Europe", "Africa", "Americas", "Oceania", "Asia"] | None = None

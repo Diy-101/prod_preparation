@@ -1,7 +1,15 @@
-from pydantic import BaseModel, RootModel, Field, EmailStr, HttpUrl, ConfigDict, field_validator
-from typing import Annotated
-from src.schemas import CountryAlpha2
+from pydantic import (
+    BaseModel,
+    Field, EmailStr,
+    HttpUrl, ConfigDict,
+    field_validator
+)
+
 import re
+from typing import Annotated
+
+from src.schemas import CountryAlpha2
+
 
 user_login = Annotated[str, Field(
     max_length=30,
