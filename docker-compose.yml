@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./tests/init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
       - db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "testuser", "-d", "prod"]
@@ -30,18 +30,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    restart: no
-
-  newman:
-    image: postman/newman:latest
-    container_name: newman
-    command: ["run",
-              "/etc/newman/public-tests.json",
-              "-e", "/etc/newman/env.json", "--verbose"]
-    volumes:
-      - ./tests:/etc/newman
-    depends_on:
-      - backend
     restart: no
 
 volumes:
