@@ -44,3 +44,37 @@ def test_get_me(client, test_user):
     assert response_data["isPublic"] == test_user["isPublic"]
     assert response_data["image"] == test_user["image"]
     assert response_data["login"] == test_user["login"]
+
+def test_patch_me(client, test_user):
+    token = test_login(client, test_user)
+    response = client.patch(
+        url="/api/me/profile",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"phone": "+749512387372"},
+    )
+    response_data = response.json()
+
+    assert response.status_code == 200, f"Response: {response.text}"
+    assert response_data["phone"] == "+749512387372"
+    assert response_data["isPublic"] == test_user["isPublic"]
+    assert response_data["image"] == test_user["image"]
+    assert response_data["login"] == test_user["login"]
+    assert response_data["email"] == test_user["email"]
+    assert response_data["countryCode"] == test_user["countryCode"]
+
+def test_patch_me_empty(client, test_user):
+    token = test_login(client, test_user)
+    response = client.patch(
+        url="/api/me/profile",
+        headers={"Authorization": f"Bearer {token}"},
+        json={},
+    )
+    response_data = response.json()
+
+    assert response.status_code == 200, f"Response: {response.text}"
+    assert response_data["phone"] == "+749512387372"
+    assert response_data["isPublic"] == test_user["isPublic"]
+    assert response_data["image"] == test_user["image"]
+    assert response_data["login"] == test_user["login"]
+    assert response_data["email"] == test_user["email"]
+    assert response_data["countryCode"] == test_user["countryCode"]
