@@ -204,7 +204,13 @@ async def update_user_profile(
         user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token),
         db: Session = Depends(get_db)
 ) -> schemas.UserProfile:
-    user_model = db.get(models.User, user_profile.login)
+    user_model = db.execute(select(models.User).where(models.User.login == user_profile.login)).scalar()
+
+    if user_model is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Пользователь не найден"
+        )
 
     for k, v in user_data_update.model_dump(exclude_unset=True).items():
         if k != "login" and v is not None:
