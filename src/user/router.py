@@ -6,6 +6,7 @@ from fastapi import (
     status,
 )
 from sqlalchemy.orm import Session
+from sqlalchemy import select, or_
 
 from typing import Annotated
 
@@ -14,6 +15,12 @@ import src.user.schemas as schemas, src.user.models as models
 import src.user.utils as utils
 
 user_router = APIRouter()
+
+@user_router.get(
+    "/users"
+)
+async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_db)):
+    return users
 
 @user_router.post(
     "/api/auth/register",
@@ -88,16 +95,20 @@ async def register_user(
 
     # Check for existence
     if data.get("phone", None) is not None:
-        query = db.query(models.User).filter(
-            (models.User.email == data["email"]) |
-            (models.User.login == data["login"]) |
-            (models.User.phone == data["phone"])
-        ).first()
+        query = db.scalars(select(models.User).where(
+            or_(
+                models.User.email == data["email"],
+                models.User.login == data["login"],
+                models.User.phone == data["phone"]
+            )
+        )).first()
     else:
-        query = db.query(models.User).filter(
-            (models.User.email == data["email"]) |
-            (models.User.login == data["login"])
-        ).first()
+        query = db.scalars(select(models.User).where(
+            or_(
+                models.User.email == data["email"],
+                models.User.login == data["login"]
+            )
+        )).first()
 
     if query is not None:
         raise HTTPException(
@@ -156,7 +167,7 @@ async def sign_up_user(
         ],
         db: Session = Depends(get_db)
 ) -> schemas.Token:
-    query = db.query(models.User).filter(models.User.login == user_data.login).first()
+    query = db.scalars(select(models.User).where(models.User.login == user_data.login)).first()
     if query is None or not utils.verify_password(user_data.password, query.hashed_password):
         raise HTTPException(
             status_code=401,
@@ -177,3 +188,25 @@ async def get_user_profile(
         user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token)
 ) -> schemas.UserProfile:
     return user_profile
+
+@user_router.patch(
+    "/api/me/profile",
+    tags=["user"],
+    summary="Редактирование собственного профиля",
+    description="Используется для редактирования собственного профиля пользователя",
+    response_model_exclude_none=True,
+)
+async def update_user_profile(
+        user_data_update: Annotated[schemas.UserProfileUpdate, Body()],
+        user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token),
+        db: Session = Depends(get_db)
+) -> schemas.UserProfile:
+    user_model = db.get(models.User, user_profile.login)
+
+    for k, v in user_data_update.model_dump(exclude_unset=True).items():
+        if k != "login" and v is not None:
+            setattr(user_model, k, v)
+
+    db.commit()
+    db.refresh(user_model)
+    return schemas.UserProfile.model_validate(user_model)
