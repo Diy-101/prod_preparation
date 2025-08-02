@@ -17,9 +17,12 @@ import src.user.utils as utils
 user_router = APIRouter()
 
 @user_router.get(
-    "/users"
+    "/api/auth/users",
+    tags=["users"],
+    summary="Получить всех пользователей списком",
+    description="Получить всех пользователей списком",
 )
-async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_db)):
+async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_db)) -> list[schemas.UserProfile]:
     return users
 
 @user_router.post(
