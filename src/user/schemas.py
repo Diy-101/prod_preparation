@@ -80,13 +80,6 @@ class UserRegistration(UserProfile):
 class UserProfileRegistered(BaseModel):
     profile: dict[str, str | None | bool]
 
-class UserSignIn(BaseModel):
-    login: user_login
-    password: user_password
-
-class Token(BaseModel):
-    token: str
-
 class UserProfileUpdate(BaseModel):
     login: user_login | None = None
     email: user_email | None = None
@@ -98,3 +91,10 @@ class UserProfileUpdate(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+class UserSignIn(BaseModel):
+    login: user_login
+    password: user_password
+
+class Token(BaseModel):
+    token: str
