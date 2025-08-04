@@ -14,7 +14,7 @@ def db():
         yield db
 
 @pytest.fixture(scope="module")
-def test_user():
+def user():
     return {
         "login": "yellowMonkey",
         "email": "yellowstone1980@you.ru",
@@ -24,5 +24,3 @@ def test_user():
         "phone": "+74951239922",
         "image": "https://http.cat/images/100.jpg"
     }
-
-

@@ -129,7 +129,8 @@ async def register_user(
 
     # Creating new user
     hashed_password = utils.get_password_hash(user_data.password)
-
+    del data["password"]
+    
     new_user = models.User(
         login=data["login"],
         email=data["email"],
