@@ -11,10 +11,12 @@ from sqlalchemy import select, or_
 from typing import Annotated
 
 from src.database import get_db
-import src.user.schemas as schemas, src.user.models as models
+import src.user.schemas as schemas
+import src.user.models as models
 import src.user.utils as utils
 
 user_router = APIRouter()
+
 
 @user_router.get(
     "/api/auth/users",
@@ -22,8 +24,11 @@ user_router = APIRouter()
     summary="Получить всех пользователей списком",
     description="Получить всех пользователей списком",
 )
-async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_db)) -> list[schemas.UserProfile]:
+async def get_users(
+    users: list[schemas.UserProfile] = Depends(utils.get_users_db),
+) -> list[schemas.UserProfile]:
     return users
+
 
 @user_router.post(
     "/api/auth/register",
@@ -43,11 +48,11 @@ async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_d
                             "countryCode": "RU",
                             "isPublic": True,
                             "phone": "+74951239922",
-                            "image": "https://http.cat/images/100.jpg"
+                            "image": "https://http.cat/images/100.jpg",
                         }
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Регистрационные данные не соответствуют ожидаемому формату и требованиям.",
@@ -57,7 +62,7 @@ async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_d
                         "reason": "<объяснение, почему запрос пользователя не может быть обработан>"
                     }
                 }
-            }
+            },
         },
         409: {
             "description": "Нарушено требование на уникальность авторизационных данных пользователей.",
@@ -67,29 +72,29 @@ async def get_users(users: list[schemas.UserProfile] = Depends(utils.get_users_d
                         "reason": "<объяснение, почему запрос пользователя не может быть обработан>"
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def register_user(
-        user_data: Annotated[
-            schemas.UserRegistration,
-            Body(
-                description="Данные для регистрации пользователя.",
-                examples=[
-                    {
+    user_data: Annotated[
+        schemas.UserRegistration,
+        Body(
+            description="Данные для регистрации пользователя.",
+            examples=[
+                {
                     "login": "yellowMonkey",
                     "email": "yellowstone1980@you.ru",
                     "password": "$aba4821FWfew01#.fewA$",
                     "countryCode": "RU",
                     "isPublic": True,
                     "phone": "+74951239922",
-                    "image": "https://http.cat/images/100.jpg"
-                    }
-                ]
-            )
-        ],
-        db: Session = Depends(get_db)
+                    "image": "https://http.cat/images/100.jpg",
+                }
+            ],
+        ),
+    ],
+    db: Session = Depends(get_db),
 ) -> schemas.UserProfileRegistered:
     data = user_data.model_dump(mode="python", exclude_none=True)
 
@@ -98,25 +103,28 @@ async def register_user(
 
     # Check for existence
     if data.get("phone", None) is not None:
-        query = db.scalars(select(models.User).where(
-            or_(
-                models.User.email == data["email"],
-                models.User.login == data["login"],
-                models.User.phone == data["phone"]
+        query = db.scalars(
+            select(models.User).where(
+                or_(
+                    models.User.email == data["email"],
+                    models.User.login == data["login"],
+                    models.User.phone == data["phone"],
+                )
             )
-        )).first()
+        ).first()
     else:
-        query = db.scalars(select(models.User).where(
-            or_(
-                models.User.email == data["email"],
-                models.User.login == data["login"]
+        query = db.scalars(
+            select(models.User).where(
+                or_(
+                    models.User.email == data["email"],
+                    models.User.login == data["login"],
+                )
             )
-        )).first()
+        ).first()
 
     if query is not None:
         raise HTTPException(
-            status_code=409,
-            detail=f"Пользователь с таким данными уже существует"
+            status_code=409, detail="Пользователь с таким данными уже существует"
         )
 
     # Creating new user
@@ -138,6 +146,7 @@ async def register_user(
 
     return schemas.UserProfileRegistered(profile=data)
 
+
 @user_router.post(
     "/api/auth/sign-in",
     tags=["user"],
@@ -147,38 +156,39 @@ async def register_user(
     responses={
         200: {
             "description": "Возвращает токен пользователя",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "token": "<KEY>"
-                    }
-                }
-            }
+            "content": {"application/json": {"example": {"token": "<KEY>"}}},
         }
-    }
+    },
 )
 async def sign_up_user(
-        user_data: Annotated[schemas.UserSignIn, Body(
+    user_data: Annotated[
+        schemas.UserSignIn,
+        Body(
             description="Данные для аутентификации пользователя.",
             examples=[
                 {
                     "login": "yellowMonkey",
                     "password": "$aba4821FWfew01#.fewA$",
                 }
-            ]
-        )
-        ],
-        db: Session = Depends(get_db)
+            ],
+        ),
+    ],
+    db: Session = Depends(get_db),
 ) -> schemas.Token:
-    query = db.scalars(select(models.User).where(models.User.login == user_data.login)).first()
-    if query is None or not utils.verify_password(user_data.password, query.hashed_password):
+    query = db.scalars(
+        select(models.User).where(models.User.login == user_data.login)
+    ).first()
+    if query is None or not utils.verify_password(
+        user_data.password, query.hashed_password
+    ):
         raise HTTPException(
             status_code=401,
             detail="Пользователь с указанным логином и паролем не найден",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
     token = utils.create_access_token(data={"sub": query.login})
     return schemas.Token(token=token)
+
 
 @user_router.get(
     "/api/me/profile",
@@ -188,9 +198,10 @@ async def sign_up_user(
     response_model_exclude_none=True,
 )
 async def get_user_profile(
-        user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token)
+    user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token),
 ) -> schemas.UserProfile:
     return user_profile
+
 
 @user_router.patch(
     "/api/me/profile",
@@ -200,17 +211,16 @@ async def get_user_profile(
     response_model_exclude_none=True,
 )
 async def update_user_profile(
-        user_data_update: Annotated[schemas.UserProfileUpdate, Body()],
-        user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token),
-        db: Session = Depends(get_db)
+    user_data_update: Annotated[schemas.UserProfileUpdate, Body()],
+    user_profile: schemas.UserProfile = Depends(utils.get_profile_via_token),
+    db: Session = Depends(get_db),
 ) -> schemas.UserProfile:
-    user_model = db.execute(select(models.User).where(models.User.login == user_profile.login)).scalar()
+    user_model = db.execute(
+        select(models.User).where(models.User.login == user_profile.login)
+    ).scalar()
 
     if user_model is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Пользователь не найден"
-        )
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
 
     for k, v in user_data_update.model_dump(exclude_unset=True).items():
         if k != "login" and v is not None:
