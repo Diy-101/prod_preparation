@@ -34,7 +34,7 @@ def get_countries(
         None,
         description="Список регионов для фильтрации стран. Доступные значения: Europe, Africa, Americas, Oceania, Asia. "
                     "Если параметр отсутствует или передан пустой массив — фильтрация не применяется.",
-        example=["Europe", "Asia"],
+        examples=["Europe", "Asia"],
         enum=["Europe", "Africa", "Americas", "Oceania", "Asia"],
         title="Region Filter"
     ),
